@@ -1,10 +1,15 @@
-import numpy as np
 from copy import deepcopy
-from shapely.geometry import Polygon
-from scipy.spatial import ConvexHull, convex_hull_plot_2d
-import numba
-from ..data_protos import BBox
+from typing import Tuple
 
+import numba
+import numpy as np
+from numpy import ndarray
+from scipy.spatial import ConvexHull, convex_hull_plot_2d
+from shapely.geometry import Polygon
+
+from mot_3d.data_protos.bbox import BBox
+
+from ..data_protos import BBox
 
 __all__ = ['pc_in_box', 'downsample', 'pc_in_box_2D',
            'apply_motion_to_points', 'make_transformation_matrix',
@@ -158,7 +163,7 @@ def iou2d(box_a, box_b):
     return iou
 
 
-def iou3d(box_a, box_b):
+def iou3d(box_a: BBox, box_b: BBox) -> Tuple[float, float]:
     boxa_corners = np.array(BBox.box2corners2d(box_a))
     boxb_corners = np.array(BBox.box2corners2d(box_b))[:, :2]
     reca, recb = Polygon(boxa_corners), Polygon(boxb_corners)
@@ -175,7 +180,7 @@ def iou3d(box_a, box_b):
     return iou_2d, iou_3d
 
 
-def pc2world(ego_matrix, pcs):
+def pc2world(ego_matrix: ndarray, pcs: ndarray) -> ndarray:
     new_pcs = np.concatenate((pcs,
                               np.ones(pcs.shape[0])[:, np.newaxis]),
                               axis=1)
@@ -204,7 +209,7 @@ def giou2d(box_a: BBox, box_b: BBox):
     return I / U - (C - U) / C
 
 
-def giou3d(box_a: BBox, box_b: BBox):
+def giou3d(box_a: BBox, box_b: BBox) -> float:
     boxa_corners = np.array(BBox.box2corners2d(box_a))[:, :2]
     boxb_corners = np.array(BBox.box2corners2d(box_b))[:, :2]
     reca, recb = Polygon(boxa_corners), Polygon(boxb_corners)
@@ -229,7 +234,7 @@ def giou3d(box_a: BBox, box_b: BBox):
     return giou
 
 
-def PolyArea2D(pts):
+def PolyArea2D(pts: ndarray) -> float:
     roll_pts = np.roll(pts, -1, axis=0)
     area = np.abs(np.sum((pts[:, 0] * roll_pts[:, 1] - pts[:, 1] * roll_pts[:, 0]))) * 0.5
     return area
@@ -243,7 +248,7 @@ def back_step_det(det: BBox, velo, time_lag):
     return result
 
 
-def diff_orientation_correction(diff):
+def diff_orientation_correction(diff: float) -> float:
     """
     return the angle diff = det - trk
     if angle diff > 90 or < -90, rotate trk and update the angle diff

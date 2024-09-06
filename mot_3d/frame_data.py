@@ -2,10 +2,12 @@
 """
 from .data_protos import BBox
 import numpy as np, mot_3d.utils as utils
+from numpy import ndarray
+from typing import Dict, List, Optional
 
 
 class FrameData:
-    def __init__(self, dets, ego, time_stamp=None, pc=None, det_types=None, aux_info=None):
+    def __init__(self, dets: List[ndarray], ego: ndarray, time_stamp: Optional[float]=None, pc: Optional[ndarray]=None, det_types: Optional[List[int]]=None, aux_info: Optional[Dict[str, bool]]=None) -> None:
         self.dets = dets         # detections for each frame
         self.ego = ego           # ego matrix information
         self.pc = pc

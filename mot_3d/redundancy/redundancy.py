@@ -4,10 +4,12 @@ from ..data_protos import BBox, Validity
 import numpy as np, mot_3d.utils as utils
 from ..tracklet import Tracklet
 from ..association import associate_dets_to_tracks
+from numpy import ndarray
+from typing import Dict, Optional, Tuple, Union, Any, List
 
 
 class RedundancyModule:
-    def __init__(self, configs):
+    def __init__(self, configs: Dict[str, Any]) -> None:
         self.configs = configs
         self.mode = configs['redundancy']['mode']
         self.asso = configs['running']['asso']
@@ -15,7 +17,7 @@ class RedundancyModule:
         self.det_threshold = configs['redundancy']['det_dist_threshold'][self.asso]
         self.motion_model_type = configs['running']['motion_model']
     
-    def infer(self, trk: Tracklet, input_data: FrameData, time_lag=None):
+    def infer(self, trk: Tracklet, input_data: FrameData, time_lag: Optional[float]=None) -> Tuple[BBox, int, Dict[str, ndarray]]:
         if self.mode == 'bbox':
             return self.bbox_redundancy(trk, input_data)
         elif self.mode == 'mm':
@@ -29,7 +31,7 @@ class RedundancyModule:
         pred_bbox = trk.get_state()
         return pred_bbox, 0, None
     
-    def motion_model_redundancy(self, trk: Tracklet, input_data: FrameData, time_lag):
+    def motion_model_redundancy(self, trk: Tracklet, input_data: FrameData, time_lag: float) -> Tuple[BBox, int, Dict[str, ndarray]]:
         # get the motion model prediction / current state
         pred_bbox = trk.get_state()
 
@@ -65,7 +67,7 @@ class RedundancyModule:
             update_mode = 3 # associated
         return result_bbox, update_mode, {'velo': np.zeros(2)} 
     
-    def bipartite_infer(self, input_data: FrameData, tracklets):
+    def bipartite_infer(self, input_data: FrameData, tracklets: List[Tracklet]) -> Tuple[List[BBox], List[int]]: 
         dets = input_data.dets
         det_indexes = [i for i, det in enumerate(dets) if det.s >= self.det_score]
         dets = [dets[i] for i in det_indexes]

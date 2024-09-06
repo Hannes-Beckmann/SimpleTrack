@@ -9,10 +9,11 @@ import numpy as np
 from ..data_protos import Validity
 from ..update_info_data import UpdateInfoData
 from .. import utils
+from typing import Dict, Union, Any
 
 
 class HitManager:
-    def __init__(self, configs, frame_index):
+    def __init__(self, configs: Dict[str, Any], frame_index: int) -> None:
         self.time_since_update = 0
         self.hits = 1           # number of total hits including the first detection
         self.hit_streak = 1     # number of continuing hit considering the first detection
@@ -31,7 +32,7 @@ class HitManager:
             self.state = 'alive'
             self.recent_state = 1
     
-    def predict(self, is_key_frame):
+    def predict(self, is_key_frame: bool) -> None:
         # only on key frame
         # unassociated prediction affects the life-cycle management
         if not is_key_frame:
@@ -45,11 +46,11 @@ class HitManager:
         self.fall = True
         return
     
-    def if_valid(self, update_info):
+    def if_valid(self, update_info: UpdateInfoData) -> int:
         self.recent_state = update_info.mode
         return update_info.mode
     
-    def update(self, update_info: UpdateInfoData, is_key_frame=True):
+    def update(self, update_info: UpdateInfoData, is_key_frame: bool=True) -> None:
         # the update happening during the non-key-frame
         # can extend the life of tracklet
         association = self.if_valid(update_info)
@@ -65,7 +66,7 @@ class HitManager:
         if is_key_frame:
             self.state_transition(association, update_info.frame_index)
     
-    def state_transition(self, mode, frame_index):
+    def state_transition(self, mode: int, frame_index: int) -> None:
         # if just founded
         if self.state == 'birth':
             if (self.hits >= self.min_hits) or (frame_index <= self.min_hits):
@@ -81,13 +82,13 @@ class HitManager:
     def alive(self, frame_index):
         return self.state == 'alive'
     
-    def death(self, frame_index):
+    def death(self, frame_index: int) -> bool:
         return self.state == 'dead'
     
     def valid_output(self, frame_index):
         return (self.state == 'alive') and (self.no_asso == False)
     
-    def state_string(self, frame_index):
+    def state_string(self, frame_index: int) -> str:
         """ Each tracklet use a state strong to represent its state
             This string is used for determining output, etc.
         """

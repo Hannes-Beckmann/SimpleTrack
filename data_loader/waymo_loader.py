@@ -7,10 +7,11 @@ import os, numpy as np, json
 import mot_3d.utils as utils
 from mot_3d.data_protos import BBox
 from mot_3d.preprocessing import nms
+from typing import Dict, List, Tuple, Any
 
 
 class WaymoLoader:
-    def __init__(self, configs, type_token, segment_name, data_folder, det_data_folder, start_frame):
+    def __init__(self, configs: Dict[str, Any], type_token: List[int], segment_name: str, data_folder: str, det_data_folder: str, start_frame: int) -> None:
         """ initialize with the path to data 
         Args:
             data_folder (str): root path to your data
@@ -42,7 +43,7 @@ class WaymoLoader:
     def __iter__(self):
         return self
     
-    def __next__(self):
+    def __next__(self) -> Dict[str, Any]:
         if self.cur_frame >= self.max_frame:
             raise StopIteration
 
@@ -80,10 +81,10 @@ class WaymoLoader:
         self.cur_frame += 1
         return result
     
-    def __len__(self):
+    def __len__(self) -> int:
         return self.max_frame
     
-    def frame_nms(self, dets, det_types, velos, thres):
+    def frame_nms(self, dets: List[BBox], det_types: List[int], velos: None, thres: float) -> Tuple[List[BBox], List[int], None]:
         frame_indexes, frame_types = nms(dets, det_types, thres)
         result_dets = [dets[i] for i in frame_indexes]
         result_velos = None

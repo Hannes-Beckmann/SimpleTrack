@@ -4,10 +4,11 @@
 import numpy as np
 from ..data_protos import BBox
 from filterpy.kalman import KalmanFilter
+from typing import Dict, Optional
 
 
 class KalmanFilterMotionModel:
-    def __init__(self, bbox: BBox, inst_type, time_stamp, covariance='default'):
+    def __init__(self, bbox: BBox, inst_type: int, time_stamp: float, covariance: str='default') -> None:
         # the time stamp of last observation
         self.prev_time_stamp = time_stamp
         self.latest_time_stamp = time_stamp
@@ -70,7 +71,7 @@ class KalmanFilterMotionModel:
 
         self.history = [bbox]
     
-    def predict(self, time_stamp=None):
+    def predict(self, time_stamp: None=None) -> None:
         """ For the motion prediction, use the get_prediction function.
         """
         self.kf.predict()
@@ -78,7 +79,7 @@ class KalmanFilterMotionModel:
         if self.kf.x[3] < -np.pi: self.kf.x[3] += np.pi * 2
         return
 
-    def update(self, det_bbox: BBox, aux_info=None): 
+    def update(self, det_bbox: BBox, aux_info: Optional[Dict[str, bool]]=None) -> None: 
         """ 
         Updates the state vector with observed bbox.
         """
@@ -125,7 +126,7 @@ class KalmanFilterMotionModel:
         self.history[-1] = cur_bbox
         return
 
-    def get_prediction(self, time_stamp=None):       
+    def get_prediction(self, time_stamp: Optional[float]=None) -> BBox:       
         """
         Advances the state vector and returns the predicted bounding box estimate.
         """
@@ -149,7 +150,7 @@ class KalmanFilterMotionModel:
         self.history.append(pred_bbox)
         return pred_bbox
 
-    def get_state(self):
+    def get_state(self) -> BBox:
         """
         Returns the current bounding box estimate.
         """
@@ -160,6 +161,6 @@ class KalmanFilterMotionModel:
         """
         return np.matmul(np.matmul(self.kf.H, self.kf.P), self.kf.H.T) + self.kf.R
     
-    def sync_time_stamp(self, time_stamp):
+    def sync_time_stamp(self, time_stamp: float) -> None:
         self.time_stamp = time_stamp
         return

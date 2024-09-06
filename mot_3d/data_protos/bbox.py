@@ -2,10 +2,12 @@
 """
 import numpy as np
 from copy import deepcopy
+from numpy import ndarray
+from typing import List, Union
 
 
 class BBox:
-    def __init__(self, x=None, y=None, z=None, h=None, w=None, l=None, o=None):
+    def __init__(self, x: float=None, y: float=None, z: float=None, h: float=None, w: float=None, l: float=None, o: float=None) -> None:
         self.x = x      # center x
         self.y = y      # center y
         self.z = z      # center z
@@ -26,14 +28,14 @@ class BBox:
             'height': bbox.h, 'width': bbox.w, 'length': bbox.l, 'heading': bbox.o}
     
     @classmethod
-    def bbox2array(cls, bbox):
+    def bbox2array(cls, bbox: "BBox") -> ndarray:
         if bbox.s is None:
             return np.array([bbox.x, bbox.y, bbox.z, bbox.o, bbox.l, bbox.w, bbox.h])
         else:
             return np.array([bbox.x, bbox.y, bbox.z, bbox.o, bbox.l, bbox.w, bbox.h, bbox.s])
 
     @classmethod
-    def array2bbox(cls, data):
+    def array2bbox(cls, data: Union[ndarray, List[float]]) -> "BBox":
         bbox = BBox()
         bbox.x, bbox.y, bbox.z, bbox.o, bbox.l, bbox.w, bbox.h = data[:7]
         if len(data) == 8:
@@ -64,10 +66,11 @@ class BBox:
         bboxa.h = bboxb.h
         bboxa.o = bboxb.o
         bboxa.s = bboxb.s
+        #TODO: ?????
         return
     
     @classmethod
-    def box2corners2d(cls, bbox):
+    def box2corners2d(cls, bbox: "BBox") -> List[List[float]]:
         """ the coordinates for bottom corners
         """
         bottom_center = np.array([bbox.x, bbox.y, bbox.z - bbox.h / 2])
@@ -84,7 +87,7 @@ class BBox:
         return [pc0.tolist(), pc1.tolist(), pc2.tolist(), pc3.tolist()]
     
     @classmethod
-    def box2corners3d(cls, bbox):
+    def box2corners3d(cls, bbox: "BBox") -> List[List[float]]:
         """ the coordinates for bottom corners
         """
         center = np.array([bbox.x, bbox.y, bbox.z])
@@ -94,7 +97,7 @@ class BBox:
         return corners.tolist()
     
     @classmethod
-    def motion2bbox(cls, bbox, motion):
+    def motion2bbox(cls, bbox: "BBox", motion: List[float]) -> "BBox":
         result = deepcopy(bbox)
         result.x += motion[0]
         result.y += motion[1]
@@ -103,13 +106,13 @@ class BBox:
         return result
     
     @classmethod
-    def set_bbox_size(cls, bbox, size_array):
+    def set_bbox_size(cls, bbox: "BBox", size_array: List[float]) -> "BBox":
         result = deepcopy(bbox)
         result.l, result.w, result.h = size_array
         return result
     
     @classmethod
-    def set_bbox_with_states(cls, prev_bbox, state_array):
+    def set_bbox_with_states(cls, prev_bbox: "BBox", state_array: ndarray) -> "BBox":
         prev_array = BBox.bbox2array(prev_bbox)
         prev_array[:4] += state_array[:4]
         prev_array[4:] = state_array[4:]
@@ -117,7 +120,7 @@ class BBox:
         return bbox 
     
     @classmethod
-    def box_pts2world(cls, ego_matrix, pcs):
+    def box_pts2world(cls, ego_matrix: ndarray, pcs: ndarray) -> ndarray:
         new_pcs = np.concatenate((pcs,
                                   np.ones(pcs.shape[0])[:, np.newaxis]),
                                   axis=1)
@@ -126,7 +129,7 @@ class BBox:
         return new_pcs
     
     @classmethod
-    def edge2yaw(cls, center, edge):
+    def edge2yaw(cls, center: ndarray, edge: ndarray) -> float:
         vec = edge - center
         yaw = np.arccos(vec[0] / np.linalg.norm(vec))
         if vec[1] < 0:
@@ -134,7 +137,7 @@ class BBox:
         return yaw
     
     @classmethod
-    def bbox2world(cls, ego_matrix, box):
+    def bbox2world(cls, ego_matrix: ndarray, box: "BBox") -> "BBox":
         # center and corners
         corners = np.array(BBox.box2corners2d(box))
         center = BBox.bbox2array(box)[:3][np.newaxis, :]

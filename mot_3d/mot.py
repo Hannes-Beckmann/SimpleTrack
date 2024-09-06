@@ -9,10 +9,12 @@ from .association import associate_dets_to_tracks
 from . import visualization
 from mot_3d import redundancy
 import pdb, os
+from numpy import ndarray
+from typing import Any, Dict, List, Tuple
 
 
 class MOTModel:
-    def __init__(self, configs):
+    def __init__(self, configs: Dict[str, Any]) -> None:
         self.trackers = list()         # tracker for each single tracklet
         self.frame_count = 0           # record for the frames
         self.count = 0                 # record the obj number to assign ids
@@ -38,10 +40,10 @@ class MOTModel:
         self.min_hits = configs['running']['min_hits_to_birth']
 
     @property
-    def has_velo(self):
+    def has_velo(self) -> bool:
         return not (self.motion_model == 'kf' or self.motion_model == 'fbkf' or self.motion_model == 'ma')
     
-    def frame_mot(self, input_data: FrameData):
+    def frame_mot(self, input_data: FrameData) -> List[Tuple[BBox, int, str, int]]:
         """ For each frame input, generate the latest mot results
         Args:
             input_data (FrameData): input data, including detection bboxes and ego information
@@ -120,7 +122,7 @@ class MOTModel:
 
         return result
     
-    def forward_step_trk(self, input_data: FrameData):
+    def forward_step_trk(self, input_data: FrameData) -> Tuple[List[ndarray], ndarray, ndarray]:
         dets = input_data.dets
         det_indexes = [i for i, det in enumerate(dets) if det.s >= self.score_threshold]
         dets = [dets[i] for i in det_indexes]
@@ -144,7 +146,7 @@ class MOTModel:
             unmatched_dets[k] = det_indexes[unmatched_dets[k]]
         return matched, unmatched_dets, unmatched_trks
     
-    def non_key_forward_step_trk(self, input_data: FrameData):
+    def non_key_forward_step_trk(self, input_data: FrameData) -> Tuple[List[ndarray], ndarray, ndarray]:
         """ tracking on non-key frames (for nuScenes)
         """
         dets = input_data.dets

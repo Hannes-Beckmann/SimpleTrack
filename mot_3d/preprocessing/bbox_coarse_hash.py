@@ -3,15 +3,16 @@
 """
 import numpy as np
 from ..data_protos import BBox
+from typing import List
 
 
 class BBoxCoarseFilter:
-    def __init__(self, grid_size, scaler=100):
+    def __init__(self, grid_size: int, scaler: int=100) -> None:
         self.gsize = grid_size
         self.scaler = 100
         self.bbox_dict = dict()
     
-    def bboxes2dict(self, bboxes):
+    def bboxes2dict(self, bboxes: List[BBox]) -> None:
         for i, bbox in enumerate(bboxes):
             grid_keys = self.compute_bbox_key(bbox)
             for key in grid_keys:
@@ -21,7 +22,7 @@ class BBoxCoarseFilter:
                     self.bbox_dict[key].add(i)
         return
         
-    def compute_bbox_key(self, bbox):
+    def compute_bbox_key(self, bbox: BBox) -> List[int]:
         corners = np.asarray(BBox.box2corners2d(bbox))
         min_keys = np.floor(np.min(corners, axis=0) / self.gsize).astype(int)
         max_keys = np.floor(np.max(corners, axis=0) / self.gsize).astype(int)
@@ -35,7 +36,7 @@ class BBoxCoarseFilter:
         ]
         return grid_keys
     
-    def related_bboxes(self, bbox):
+    def related_bboxes(self, bbox: BBox) -> List[int]:
         """ return the list of related bboxes
         """ 
         result = set()

@@ -4,10 +4,12 @@ from scipy.optimize import linear_sum_assignment
 from .frame_data import FrameData
 from .update_info_data import UpdateInfoData
 from .data_protos import BBox, Validity
+from numpy import ndarray
+from typing import Any, List, Tuple
 
 
-def associate_dets_to_tracks(dets, tracks, mode, asso, 
-    dist_threshold=0.9, trk_innovation_matrix=None):
+def associate_dets_to_tracks(dets: List[BBox], tracks: List[BBox], mode: str, asso: str, 
+    dist_threshold: float=0.9, trk_innovation_matrix: None=None) -> Tuple[List[ndarray], ndarray, ndarray]:
     """ associate the tracks with detections
     """
     if mode == 'bipartite':
@@ -36,7 +38,7 @@ def associate_dets_to_tracks(dets, tracks, mode, asso,
     return matches, np.array(unmatched_dets), np.array(unmatched_tracks)
 
 
-def bipartite_matcher(dets, tracks, asso, dist_threshold, trk_innovation_matrix):
+def bipartite_matcher(dets: List[BBox], tracks: List[BBox], asso: str, dist_threshold: float, trk_innovation_matrix: None) -> Tuple[ndarray, ndarray]:
     if asso == 'iou':
         dist_matrix = compute_iou_distance(dets, tracks, asso)
     elif asso == 'giou':
@@ -108,7 +110,7 @@ def compute_m_distance(dets, tracks, trk_innovation_matrix):
     return dist_matrix
 
 
-def compute_iou_distance(dets, tracks, asso='iou'):
+def compute_iou_distance(dets: List[BBox], tracks: List[BBox], asso: str='iou') -> ndarray:
     iou_matrix = np.zeros((len(dets), len(tracks)))
     for d, det in enumerate(dets):
         for t, trk in enumerate(tracks):

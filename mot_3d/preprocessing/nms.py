@@ -2,16 +2,17 @@ import numpy as np
 from .. import utils
 from ..data_protos import BBox
 from .bbox_coarse_hash import BBoxCoarseFilter
+from typing import List, Tuple
 
 
-def weird_bbox(bbox):
+def weird_bbox(bbox: BBox) -> bool:
     if bbox.l <= 0 or bbox.w <= 0 or bbox.h <= 0:
         return True
     else:
         return False
 
 
-def nms(dets, inst_types, threshold_low=0.1, threshold_high=1.0, threshold_yaw=0.3):
+def nms(dets: List[BBox], inst_types: List[int], threshold_low: float=0.1, threshold_high: float=1.0, threshold_yaw: float=0.3) -> Tuple[List[int], List[int]]:
     """ keep the bboxes with overlap <= threshold
     """
     dets_coarse_filter = BBoxCoarseFilter(grid_size=100, scaler=100)

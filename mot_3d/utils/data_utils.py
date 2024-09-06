@@ -2,12 +2,14 @@
 # Transfer the ID from string into int if needed
 from ..data_protos import BBox
 import numpy as np
+from numpy import ndarray
+from typing import List, Tuple
 
 
 __all__ = ['inst_filter', 'str2int', 'box_wrapper', 'type_filter', 'id_transform']
 
 
-def str2int(strs):
+def str2int(strs: List[str]) -> List[int]:
     result = [int(s) for s in strs]
     return result
 
@@ -24,7 +26,7 @@ def box_wrapper(bboxes, ids):
     return result
 
 
-def id_transform(ids):
+def id_transform(ids: ndarray) -> List[List[int]]:
     frame_num = len(ids)
 
     id_list = list()
@@ -46,7 +48,7 @@ def id_transform(ids):
     return result    
 
 
-def inst_filter(ids, bboxes, types, type_field=[1], id_trans=False):
+def inst_filter(ids: ndarray, bboxes: ndarray, types: ndarray, type_field: List[int]=[1], id_trans: bool=False) -> Tuple[List[List[int]], List[List[BBox]]]:
     """ filter the bboxes according to types
     """
     frame_num = len(ids)
